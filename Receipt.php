@@ -95,7 +95,7 @@ class Receipt {
 	}
 
 	public function writeLf($data, $encoded = FALSE) {
-		$this->write($data, $maxlen);
+		$this->write($data, $encoded);
 		$this->lf();
 	}
 
@@ -155,5 +155,11 @@ class Receipt {
 
 	public function fontB() {
 		$this->buff("\x1b\x4d\x01");
+	}
+
+	public function fontSet( $doubleW = 0, $doubleH = 0, $fontB = 0) {
+		$code = ($doubleW ? 32 : 0) + ($doubleH ? 16 : 0) + ($fontB ? 1 : 0);
+		$this->buff("\x1b\x21" . chr($code));
+
 	}
 }
