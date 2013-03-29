@@ -1,0 +1,159 @@
+<?php
+
+namespace EscPos;
+
+class Receipt {
+	private $driver;
+	private $buffer = array();
+
+	public function __construct(IDriver $driver) {
+		$this->driver = $driver;
+	}
+
+	public function send() {
+		$this->finalize();
+		$this->driver->send(join("", $this->buffer));
+		$this->resetBuff();
+	}
+
+	public function test() {
+		foreach ($this->buffer as $value) {
+			for ($i=0; $i < strlen($value); $i++) {
+				echo "\\x" . sprintf('%02s', dechex(ord($value[$i])));
+			}
+			echo "\n";
+		}
+	}
+
+	private function resetBuff() {
+		$this->buffer = array();
+	}
+
+	private function buff($data) {
+		$this->buffer[] = $data;
+	}
+
+	public function finalize() {
+		$last = end($this->buffer);
+		//                           LF      cut
+		if( ! in_array($last, array("\x0a", "\x1d\x56\x42\x03"))) {
+			$this->lf();
+		}
+	}
+
+	public function init() {
+		$this->resetBuff();
+		//                     ESC @
+		$this->buff("\x1b\x40");
+	}
+
+	public function lf() {
+		//                 LF
+		$this->buff("\x0a");
+	}
+
+	public function feed($lines=1) {
+		$n = chr($lines);
+		//           ESC d n
+		$this->buff("\x1bd$n");
+	}
+
+	public function cut($fullCut=FALSE) {
+		$n = chr($fullCut ? 0 : 1);
+		//                 GS  V   n
+		$this->buff("\x1d\x56$n");
+	}
+
+	public function feedCut($feedBefore = 3, $fullCut=FALSE) {
+		$m = $fullCut ? "\x41" : "\x42";
+		$n = chr($feedBefore);
+
+		//                 GS  V     m  n
+		$this->buff("\x1d\x56".$m.$n);
+	}
+
+	public function encodeOutput($data) {
+		return iconv("UTF-8", "ISO-8859-2//IGNORE", $data);
+	}
+
+	public function write($data, $encoded = FALSE) {
+		if($encoded) {
+			$this->buff($data);
+		}
+		else {
+			$this->buff($this->encodeOutput($data));
+		}
+	}
+
+	public function strlen($data, $encoded = FALSE) {
+		if($encoded) {
+			return strlen($data);
+		}
+		else {
+			return strlen($this->encodeOutput($data));
+		}
+	}
+
+	public function writeLf($data, $encoded = FALSE) {
+		$this->write($data, $maxlen);
+		$this->lf();
+	}
+
+	public function logo($kc1, $kc2, $sizeX=1, $sizeY=1) {
+		$this->validateLogoKc($kc1);
+		$this->validateLogoKc($kc2);
+
+		$chKc1 = chr($kc1);
+		$chKc2 = chr($kc2);
+		$chSizeX = chr($sizeX);
+		$chSizeY = chr($sizeY);
+		//                 GS  (L 6  0   48  69      kc1      kc2      x          y
+		$this->buff("\x1d(L\x06\x00\x30\x45" . $chKc1 . $chKc2 . $chSizeX . $chSizeY);
+	}
+
+	private function validateLogoKc( $kc ) {
+		if($kc < 32 || $kc > 126) {
+			throw new InvalidKcException("Graphic key code expected between 32 and 126, $kc given.");
+		}
+	}
+
+	public function code128($data, $width=3, $height=42, $text=0, $font=0) {
+		$this->buff("\x1dw" . chr($width));
+		$this->buff("\x1dh". chr($height));
+		$this->buff("\x1dH" . chr($text));
+		$this->buff("\x1df". chr($font));
+		$barData = "{B{1$data";
+		$len = strlen($barData);
+		$this->buff("\x1d\x6bI" . chr($len) . $barData);
+
+	}
+
+	public function left() {
+		$this->buff("\x1b\x61\x00");
+	}
+
+	public function center() {
+		$this->buff("\x1b\x61\x01");
+	}
+
+	public function right() {
+		$this->buff("\x1b\x61\x02");
+	}
+
+	public function bold() {
+		$this->buff("\x1b\x45\x01");
+	}
+
+	public function unbold() {
+		$this->buff("\x1b\x45\x00");
+	}
+
+
+	public function fontA() {
+		$this->buff("\x1b\x4d\x00");
+	}
+
+	public function fontB() {
+		$this->buff("\x1b\x4d\x01");
+	}
+}
