@@ -1,19 +1,19 @@
 <?php
 
-namespace EscPos\Drivers;
-use \EscPos\IDriver;
+namespace EscPos\Connections;
+use \EscPos\IConnection;
 
-class Network implements IDriver {
+class Network implements IConnection {
 	private $host;
 	private $port;
 	private $socket;
 
-	public function __construct( $host, $port=9100 ) {
+	public function __construct($host, $port=9100) {
 		$this->host = $host;
 		$this->port = $port;
 	}
 
-	public function open( ) {
+	public function open() {
 		$socket = socket_create(AF_INET, SOCK_STREAM, 0);
 		if(!$socket){
 			$errorcode = socket_last_error();
@@ -37,7 +37,7 @@ class Network implements IDriver {
 		$this->socket = $socket;
 	}
 
-	public function send( $message ) {
+	public function send($message) {
 		if(!$this->isOpened()) {
 			$this->open();
 		}

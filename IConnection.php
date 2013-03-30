@@ -2,7 +2,7 @@
 
 namespace EscPos;
 
-interface IDriver {
+interface IConnection {
 
 	public function __construct($host);
 

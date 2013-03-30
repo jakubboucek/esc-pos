@@ -3,26 +3,25 @@
 namespace EscPos;
 
 class Receipt {
-	private $driver;
 	private $buffer = array();
 
-	public function __construct(IDriver $driver) {
-		$this->driver = $driver;
+	public function __construct() {
 	}
 
-	public function send() {
+	public function __toString() {
 		$this->finalize();
-		$this->driver->send(join("", $this->buffer));
-		$this->resetBuff();
+		return join("", $this->buffer);
 	}
 
 	public function test() {
+		$output = "";
 		foreach ($this->buffer as $value) {
 			for ($i=0; $i < strlen($value); $i++) {
-				echo "\\x" . sprintf('%02s', dechex(ord($value[$i])));
+				$output .= "\\x" . sprintf('%02s', dechex(ord($value[$i])));
 			}
-			echo "\n";
+			$output .= "\n";
 		}
+		return $output;
 	}
 
 	private function resetBuff() {
@@ -107,11 +106,11 @@ class Receipt {
 		$chKc2 = chr($kc2);
 		$chSizeX = chr($sizeX);
 		$chSizeY = chr($sizeY);
-		//                 GS  (L 6  0   48  69      kc1      kc2      x          y
+		//           GS  (L 6  0   48  69      kc1      kc2      x          y
 		$this->buff("\x1d(L\x06\x00\x30\x45" . $chKc1 . $chKc2 . $chSizeX . $chSizeY);
 	}
 
-	private function validateLogoKc( $kc ) {
+	private function validateLogoKc($kc) {
 		if($kc < 32 || $kc > 126) {
 			throw new InvalidKcException("Graphic key code expected between 32 and 126, $kc given.");
 		}
@@ -148,7 +147,6 @@ class Receipt {
 		$this->buff("\x1b\x45\x00");
 	}
 
-
 	public function fontA() {
 		$this->buff("\x1b\x4d\x00");
 	}
@@ -157,7 +155,7 @@ class Receipt {
 		$this->buff("\x1b\x4d\x01");
 	}
 
-	public function fontSet( $doubleW = 0, $doubleH = 0, $fontB = 0) {
+	public function fontSet($doubleW = 0, $doubleH = 0, $fontB = 0) {
 		$code = ($doubleW ? 32 : 0) + ($doubleH ? 16 : 0) + ($fontB ? 1 : 0);
 		$this->buff("\x1b\x21" . chr($code));
 
