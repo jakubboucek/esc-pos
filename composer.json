@@ -1,0 +1,14 @@
+{
+    "name": "jakubboucek/esc-pos",
+    "description": "Native ESC-POS drivers",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jakub Bouček",
+            "email": "pan@jakubboucek.cz"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
