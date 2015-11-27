@@ -46,12 +46,12 @@ class Receipt {
 
 	public function init() {
 		$this->resetBuff();
-		//                     ESC @
+		//           ESC @
 		$this->buff("\x1b\x40");
 	}
 
 	public function lf() {
-		//                 LF
+		//           LF
 		$this->buff("\x0a");
 	}
 
@@ -63,7 +63,7 @@ class Receipt {
 
 	public function cut($fullCut=FALSE) {
 		$n = chr($fullCut ? 0 : 1);
-		//                 GS  V   n
+		//           GS  V   n
 		$this->buff("\x1d\x56$n");
 	}
 
@@ -71,7 +71,7 @@ class Receipt {
 		$m = $fullCut ? "\x41" : "\x42";
 		$n = chr($feedBefore);
 
-		//                 GS  V     m  n
+		//           GS  V     m  n
 		$this->buff("\x1d\x56".$m.$n);
 	}
 
