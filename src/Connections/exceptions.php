@@ -1,6 +1,6 @@
 <?php
 
-namespace EscPos\Drivers;
+namespace EscPos\Connections;
 
 class ConnectionException extends \Exception
 {
