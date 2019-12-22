@@ -120,6 +120,17 @@ class Receipt {
 		}
 	}
 
+	public function ean13($data, $width=3, $height=42, $text=0, $font=0) {
+		$this->buff("\x1dw" . chr($width));
+		$this->buff("\x1dh". chr($height));
+		$this->buff("\x1dH" . chr($text));
+		$this->buff("\x1df". chr($font));
+		// $barData = "{B{1$data";
+		// $len = strlen($barData);
+		$this->buff("\x1dk\x02" . $data . "\x00");
+
+	}
+
 	public function code128($data, $width=3, $height=42, $text=0, $font=0) {
 		$this->buff("\x1dw" . chr($width));
 		$this->buff("\x1dh". chr($height));
@@ -128,7 +139,6 @@ class Receipt {
 		$barData = "{B{1$data";
 		$len = strlen($barData);
 		$this->buff("\x1d\x6bI" . chr($len) . $barData);
-
 	}
 
 	public function left() {
