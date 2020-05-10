@@ -4,11 +4,10 @@
  * License MIT, https://github.com/jakubboucek/esc-pos
  */
 
-
 namespace EscPos;
 
-class InvalidKcException extends \InvalidArgumentException
+use InvalidArgumentException;
+
+class InvalidKcException extends InvalidArgumentException
 {
 }
-
-

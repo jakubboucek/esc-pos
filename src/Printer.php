@@ -11,20 +11,21 @@ namespace EscPos;
  *
  * @author     Jakub Bouček
  */
-class Printer {
+class Printer
+{
+    /** @var IDriver */
+    private $driver;
 
-	/** @var IDriver */
-	private $driver;
+    /**
+     * @param IDriver
+     */
+    public function __construct(IConnection $driver)
+    {
+        $this->driver = $driver;
+    }
 
-	/**
-	 * @param  IDriver
-	 */
-	public function __construct(IConnection $driver) {
-		$this->driver = $driver;
-	}
-
-	public function write($data) {
-		$this->driver->send((string) $data);
-
-	}
+    public function write($data)
+    {
+        $this->driver->send((string)$data);
+    }
 }

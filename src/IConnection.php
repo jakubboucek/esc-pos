@@ -6,13 +6,13 @@
 
 namespace EscPos;
 
-interface IConnection {
+interface IConnection
+{
+    public function __construct($host);
 
-	public function __construct($host);
+    public function open();
 
-	public function open();
+    public function send($data);
 
-	public function send($data);
-
-	public function close();
+    public function close();
 }

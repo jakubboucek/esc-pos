@@ -2,11 +2,13 @@
 
 namespace EscPos\Connections;
 
-class ConnectionException extends \Exception
+use Exception;
+
+class ConnectionException extends Exception
 {
 }
 
 
-class SendException extends \Exception
+class SendException extends Exception
 {
 }
