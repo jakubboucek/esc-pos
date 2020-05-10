@@ -1,7 +1,7 @@
 {
     "name": "jakubboucek/esc-pos",
     "description": "Native ESC-POS drivers",
-    "type": "project",
+    "type": "library",
     "license": "MIT",
     "authors": [
         {
