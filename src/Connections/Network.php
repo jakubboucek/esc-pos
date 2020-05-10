@@ -1,8 +1,8 @@
 <?php
 
-namespace EscPos\Connections;
+namespace JakubBoucek\EscPos\Connections;
 
-use EscPos\IConnection;
+use JakubBoucek\EscPos\IConnection;
 
 class Network implements IConnection
 {

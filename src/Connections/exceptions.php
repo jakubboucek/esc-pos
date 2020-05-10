@@ -1,6 +1,6 @@
 <?php
 
-namespace EscPos\Connections;
+namespace JakubBoucek\EscPos\Connections;
 
 use Exception;
 

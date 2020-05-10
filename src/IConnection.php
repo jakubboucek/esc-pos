@@ -1,6 +1,6 @@
 <?php
 
-namespace EscPos;
+namespace JakubBoucek\EscPos;
 
 interface IConnection
 {
