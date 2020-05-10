@@ -13,14 +13,14 @@ class Receipt
     public function __toString()
     {
         $this->finalize();
-        return join("", $this->buffer);
+        return implode("", $this->buffer);
     }
 
     public function test()
     {
         $output = "";
         foreach ($this->buffer as $value) {
-            for ($i = 0; $i < strlen($value); $i++) {
+            for ($i = 0, $len = strlen($value); $i < $len; $i++) {
                 $output .= "\\x" . sprintf('%02s', dechex(ord($value[$i])));
             }
             $output .= "\n";
@@ -41,7 +41,7 @@ class Receipt
     public function finalize()
     {
         $last = end($this->buffer);
-        //                           LF      cut
+        //                     LF      cut
         if (!in_array($last, ["\x0a", "\x1d\x56\x42\x03"])) {
             $this->lf();
         }
@@ -101,9 +101,9 @@ class Receipt
     {
         if ($encoded) {
             return strlen($data);
-        } else {
-            return strlen($this->encodeOutput($data));
         }
+
+        return strlen($this->encodeOutput($data));
     }
 
     public function writeLf($data, $encoded = false)

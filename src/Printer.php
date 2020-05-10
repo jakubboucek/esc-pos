@@ -4,11 +4,11 @@ namespace JakubBoucek\EscPos;
 
 class Printer
 {
-    /** @var IDriver */
+    /** @var IConnection */
     private $driver;
 
     /**
-     * @param IDriver
+     * @param IConnection
      */
     public function __construct(IConnection $driver)
     {
