@@ -4,10 +4,14 @@ namespace JakubBoucek\EscPos;
 
 class Receipt
 {
+    const C_ESC = "\x1b";
+    const C_GS = "\x1d";
+
     private $buffer = [];
 
     public function __construct()
     {
+        $this->init();
     }
 
     public function __toString()
@@ -28,9 +32,10 @@ class Receipt
         return $output;
     }
 
-    private function resetBuff()
+    private function init()
     {
-        $this->buffer = [];
+        // ESC @
+        $this->buffer = [self::C_ESC . '@'];
     }
 
     private function buff($data)
@@ -42,59 +47,56 @@ class Receipt
     {
         $last = end($this->buffer);
         //                     LF      cut
-        if (!in_array($last, ["\x0a", "\x1d\x56\x42\x03"])) {
+        if (!in_array($last, ["\n", self::C_GS . "\x56\x42\x03"], true)) {
             $this->lf();
         }
     }
 
-    public function init()
-    {
-        $this->resetBuff();
-        //           ESC @
-        $this->buff("\x1b\x40");
-    }
-
     public function lf()
     {
-        //           LF
-        $this->buff("\x0a");
+        // LF
+        $this->buff("\n");
     }
 
     public function feed($lines = 1)
     {
-        $n = chr($lines);
-        //           ESC d n
-        $this->buff("\x1bd$n");
+        // ESC d <n>
+        $this->buff(
+            self::C_ESC . 'd'
+            . chr($lines)
+        );
     }
 
     public function cut($fullCut = false)
     {
-        $n = chr($fullCut ? 0 : 1);
-        //           GS  V   n
-        $this->buff("\x1d\x56$n");
+        // GS V <n>
+        $this->buff(
+            self::C_GS . "V"
+            . chr($fullCut ? 0 : 1)
+        );
     }
 
     public function feedCut($feedBefore = 3, $fullCut = false)
     {
-        $m = $fullCut ? "\x41" : "\x42";
-        $n = chr($feedBefore);
-
-        //           GS  V     m  n
-        $this->buff("\x1d\x56" . $m . $n);
+        // GS V <m> <n>
+        $this->buff(
+            self::C_GS . 'V'
+            . ($fullCut ? "\x41" : "\x42")
+            . chr($feedBefore)
+        );
     }
 
     public function encodeOutput($data)
     {
-        return iconv("UTF-8", "ISO-8859-2//IGNORE", $data);
+        return iconv("UTF-8", "cp852//IGNORE", $data);
     }
 
-    public function write($data, $encoded = false)
+    public function write($data, $alreadyEncoded = false)
     {
-        if ($encoded) {
-            $this->buff($data);
-        } else {
-            $this->buff($this->encodeOutput($data));
+        if ($alreadyEncoded !== true) {
+            $data = $this->encodeOutput($data);
         }
+        $this->buff($data);
     }
 
     public function strlen($data, $encoded = false)
@@ -114,84 +116,87 @@ class Receipt
 
     public function logo($kc1, $kc2, $sizeX = 1, $sizeY = 1)
     {
-        $this->validateLogoKc($kc1);
-        $this->validateLogoKc($kc2);
+        $this->validateLogoKeyCode($kc1);
+        $this->validateLogoKeyCode($kc2);
 
-        $chKc1 = chr($kc1);
-        $chKc2 = chr($kc2);
-        $chSizeX = chr($sizeX);
-        $chSizeY = chr($sizeY);
-        //           GS  (L 6  0   48  69      kc1      kc2      x          y
-        $this->buff("\x1d(L\x06\x00\x30\x45" . $chKc1 . $chKc2 . $chSizeX . $chSizeY);
+        //GS (L 6 0 48 69 <kc1> <kc2> <x> <y>
+        $this->buff(
+            self::C_GS
+            . "(L"
+            . "\x06\x00\x30\x45"
+            . chr($kc1) . chr($kc2)
+            . chr($sizeX) . chr($sizeY)
+        );
     }
 
-    private function validateLogoKc($kc)
+    private function validateLogoKeyCode($keyCode)
     {
-        if ($kc < 32 || $kc > 126) {
-            throw new InvalidKeyCodeException("Graphic key code expected between 32 and 126, $kc given.");
+        if ($keyCode < 32 || $keyCode > 126) {
+            throw new InvalidKeyCodeException("Graphic key code expected between 32 and 126, $keyCode given.");
         }
     }
 
     public function ean13($data, $width = 3, $height = 42, $text = 0, $font = 0)
     {
-        $this->buff("\x1dw" . chr($width));
-        $this->buff("\x1dh" . chr($height));
-        $this->buff("\x1dH" . chr($text));
-        $this->buff("\x1df" . chr($font));
-        // $barData = "{B{1$data";
-        // $len = strlen($barData);
-        $this->buff("\x1dk\x02" . $data . "\x00");
+        $this->buff(
+            self::C_GS . "w" . chr($width)
+            . self::C_GS . "h" . chr($height)
+            . self::C_GS . "H" . chr($text)
+            . self::C_GS . "f" . chr($font)
+            . self::C_GS . "k" . "\x02" . $data . "\x00"
+        );
     }
 
     public function code128($data, $width = 3, $height = 42, $text = 0, $font = 0)
     {
-        $this->buff("\x1dw" . chr($width));
-        $this->buff("\x1dh" . chr($height));
-        $this->buff("\x1dH" . chr($text));
-        $this->buff("\x1df" . chr($font));
         $barData = "{B{1$data";
-        $len = strlen($barData);
-        $this->buff("\x1d\x6bI" . chr($len) . $barData);
+        $this->buff(
+            self::C_GS . "w" . chr($width)
+            . self::C_GS . "h" . chr($height)
+            . self::C_GS . "H" . chr($text)
+            . self::C_GS . "f" . chr($font)
+            . self::C_GS . "\x6bI" . chr(strlen($barData)) . $barData
+        );
     }
 
     public function left()
     {
-        $this->buff("\x1b\x61\x00");
+        $this->buff(self::C_ESC . "\x61\x00");
     }
 
     public function center()
     {
-        $this->buff("\x1b\x61\x01");
+        $this->buff(self::C_ESC . "\x61\x01");
     }
 
     public function right()
     {
-        $this->buff("\x1b\x61\x02");
+        $this->buff(self::C_ESC . "\x61\x02");
     }
 
     public function bold()
     {
-        $this->buff("\x1b\x45\x01");
+        $this->buff(self::C_ESC . "\x45\x01");
     }
 
     public function unbold()
     {
-        $this->buff("\x1b\x45\x00");
+        $this->buff(self::C_ESC . "\x45\x00");
     }
 
     public function fontA()
     {
-        $this->buff("\x1b\x4d\x00");
+        $this->buff(self::C_ESC . "\x4d\x00");
     }
 
     public function fontB()
     {
-        $this->buff("\x1b\x4d\x01");
+        $this->buff(self::C_ESC . "\x4d\x01");
     }
 
     public function fontSet($doubleW = 0, $doubleH = 0, $fontB = 0)
     {
         $code = ($doubleW ? 32 : 0) + ($doubleH ? 16 : 0) + ($fontB ? 1 : 0);
-        $this->buff("\x1b\x21" . chr($code));
+        $this->buff(self::C_ESC . "\x21" . chr($code));
     }
 }

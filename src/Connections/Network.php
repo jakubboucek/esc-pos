@@ -2,8 +2,6 @@
 
 namespace JakubBoucek\EscPos\Connections;
 
-use JakubBoucek\EscPos\IConnection;
-
 class Network implements IConnection
 {
     private $host;
