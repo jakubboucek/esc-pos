@@ -10,7 +10,10 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "ext-sockets": "*",
+        "ext-iconv": "*"
+    },
     "autoload": {
         "psr-4": {
             "JakubBoucek\\EscPos\\": "src/"
