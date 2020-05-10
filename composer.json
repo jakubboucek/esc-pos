@@ -18,5 +18,8 @@
         "psr-4": {
             "JakubBoucek\\EscPos\\": "src/"
         }
+    },
+    "scripts": {
+        "phpstan": "docker run --rm -v `pwd`:/www phpstan/phpstan analyse -c /www/phpstan.neon --level 5"
     }
 }

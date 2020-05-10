@@ -1,0 +1,5 @@
+parameters:
+    paths:
+        - src
+    autoload_directories:
+        - src
