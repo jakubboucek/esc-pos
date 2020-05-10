@@ -128,7 +128,7 @@ class Receipt
     private function validateLogoKc($kc)
     {
         if ($kc < 32 || $kc > 126) {
-            throw new InvalidKcException("Graphic key code expected between 32 and 126, $kc given.");
+            throw new InvalidKeyCodeException("Graphic key code expected between 32 and 126, $kc given.");
         }
     }
 
