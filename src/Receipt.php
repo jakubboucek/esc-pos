@@ -221,9 +221,14 @@ class Receipt
         return $output;
     }
 
-    public function __toString(): string
+    public function compile(): string
     {
         $this->finalize();
         return implode("", $this->buffer);
+    }
+
+    public function __toString(): string
+    {
+        return $this->compile();
     }
 }

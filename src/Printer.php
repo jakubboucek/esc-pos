@@ -16,12 +16,12 @@ class Printer
         $this->driver = $driver;
     }
 
-    public function write(string $data): void
+    public function writeRaw(string $data): void
     {
         $this->driver->send($data);
     }
     public function writeReceipt(Receipt $data): void
     {
-        $this->driver->send((string)$data);
+        $this->driver->send($data->compile());
     }
 }
