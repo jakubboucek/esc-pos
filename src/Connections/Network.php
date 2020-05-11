@@ -1,20 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JakubBoucek\EscPos\Connections;
 
 class Network implements IConnection
 {
+    /** @var string */
     private $host;
+    /** @var int */
     private $port;
+    /** @var resource|null */
     private $socket;
 
-    public function __construct($host, $port = 9100)
+    public function __construct(string $host, int $port = 9100)
     {
         $this->host = $host;
         $this->port = $port;
     }
 
-    public function open()
+    public function open(): void
     {
         $socket = socket_create(AF_INET, SOCK_STREAM, 0);
         if (!$socket) {
@@ -39,7 +44,7 @@ class Network implements IConnection
         $this->socket = $socket;
     }
 
-    public function send($message)
+    public function send(string $message): void
     {
         if (!$this->isOpened()) {
             $this->open();
@@ -54,7 +59,7 @@ class Network implements IConnection
         }
     }
 
-    public function close()
+    public function close(): void
     {
         if ($this->isOpened()) {
             socket_close($this->socket);
@@ -62,7 +67,7 @@ class Network implements IConnection
         $this->socket = null;
     }
 
-    public function isOpened()
+    public function isOpened(): bool
     {
         return (bool)$this->socket;
     }

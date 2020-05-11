@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JakubBoucek\EscPos;
 
 class Receipt
 {
-    const C_ESC = "\x1b";
-    const C_GS = "\x1d";
+    private const C_ESC = "\x1b";
+    private const C_GS = "\x1d";
 
+    /** @var string[] */
     private $buffer = [];
 
     public function __construct()
@@ -14,18 +17,18 @@ class Receipt
         $this->init();
     }
 
-    private function init()
+    private function init(): void
     {
         // ESC @
         $this->buffer = [self::C_ESC . '@'];
     }
 
-    private function buff($data)
+    private function buff(string $data): void
     {
         $this->buffer[] = $data;
     }
 
-    private function finalize()
+    private function finalize(): void
     {
         $last = end($this->buffer);
         //                     LF      cut
@@ -34,14 +37,14 @@ class Receipt
         }
     }
 
-    public function lf()
+    public function lf(): self
     {
         // LF
         $this->buff("\n");
         return $this;
     }
 
-    public function feed($lines = 1)
+    public function feed(int $lines = 1): self
     {
         // ESC d <n>
         $this->buff(
@@ -51,7 +54,7 @@ class Receipt
         return $this;
     }
 
-    public function cut($fullCut = false)
+    public function cut(bool $fullCut = false): self
     {
         // GS V <n>
         $this->buff(
@@ -61,7 +64,7 @@ class Receipt
         return $this;
     }
 
-    public function feedCut($feedBefore = 3, $fullCut = false)
+    public function feedCut(int $feedBefore = 3, bool $fullCut = false): self
     {
         // GS V <m> <n>
         $this->buff(
@@ -72,7 +75,7 @@ class Receipt
         return $this;
     }
 
-    public function write($data, $alreadyEncoded = false)
+    public function write(string $data, bool $alreadyEncoded = false): self
     {
         if ($alreadyEncoded !== true) {
             $data = $this->encodeOutput($data);
@@ -81,14 +84,14 @@ class Receipt
         return $this;
     }
 
-    public function writeLf($data, $encoded = false)
+    public function writeLf(string $data, bool $encoded = false): self
     {
         $this->write($data, $encoded);
         $this->lf();
         return $this;
     }
 
-    public function logo($kc1, $kc2, $sizeX = 1, $sizeY = 1)
+    public function logo(int $kc1, int $kc2, int $sizeX = 1, int $sizeY = 1): self
     {
         $this->validateLogoKeyCode($kc1);
         $this->validateLogoKeyCode($kc2);
@@ -104,7 +107,7 @@ class Receipt
         return $this;
     }
 
-    public function ean13($data, $width = 3, $height = 42, $text = 0, $font = 0)
+    public function ean13(string $data, int $width = 3, int $height = 42, int $text = 0, int $font = 0): self
     {
         $this->buff(
             self::C_GS . "w" . chr($width)
@@ -116,7 +119,7 @@ class Receipt
         return $this;
     }
 
-    public function code128($data, $width = 3, $height = 42, $text = 0, $font = 0)
+    public function code128(string $data, int $width = 3, int $height = 42, int $text = 0, int $font = 0): self
     {
         $barData = "{B{1$data";
         $this->buff(
@@ -129,56 +132,56 @@ class Receipt
         return $this;
     }
 
-    public function left()
+    public function left(): self
     {
         $this->buff(self::C_ESC . "\x61\x00");
         return $this;
     }
 
-    public function center()
+    public function center(): self
     {
         $this->buff(self::C_ESC . "\x61\x01");
         return $this;
     }
 
-    public function right()
+    public function right(): self
     {
         $this->buff(self::C_ESC . "\x61\x02");
         return $this;
     }
 
-    public function bold()
+    public function bold(): self
     {
         $this->buff(self::C_ESC . "\x45\x01");
         return $this;
     }
 
-    public function unbold()
+    public function unbold(): self
     {
         $this->buff(self::C_ESC . "\x45\x00");
         return $this;
     }
 
-    public function fontA()
+    public function fontA(): self
     {
         $this->buff(self::C_ESC . "\x4d\x00");
         return $this;
     }
 
-    public function fontB()
+    public function fontB(): self
     {
         $this->buff(self::C_ESC . "\x4d\x01");
         return $this;
     }
 
-    public function fontSet($doubleW = 0, $doubleH = 0, $fontB = 0)
+    public function fontSet(int $doubleW = 0, int $doubleH = 0, int $fontB = 0): self
     {
         $code = ($doubleW ? 32 : 0) + ($doubleH ? 16 : 0) + ($fontB ? 1 : 0);
         $this->buff(self::C_ESC . "\x21" . chr($code));
         return $this;
     }
 
-    public function strlen($data, $encoded = false)
+    public function strlen(string $data, bool $encoded = false): int
     {
         if ($encoded) {
             return strlen($data);
@@ -187,19 +190,19 @@ class Receipt
         return strlen($this->encodeOutput($data));
     }
 
-    private function encodeOutput($data)
+    private function encodeOutput(string $data): string
     {
         return iconv("UTF-8", "cp852//IGNORE", $data);
     }
 
-    private function validateLogoKeyCode($keyCode)
+    private function validateLogoKeyCode(int $keyCode): void
     {
         if ($keyCode < 32 || $keyCode > 126) {
             throw new InvalidKeyCodeException("Graphic key code expected between 32 and 126, $keyCode given.");
         }
     }
 
-    public function test()
+    public function test(): string
     {
         $output = "";
         foreach ($this->buffer as $value) {
@@ -211,7 +214,7 @@ class Receipt
         return $output;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $this->finalize();
         return implode("", $this->buffer);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JakubBoucek\EscPos;
 
 use JakubBoucek\EscPos\Connections\IConnection;
@@ -14,7 +16,11 @@ class Printer
         $this->driver = $driver;
     }
 
-    public function write($data)
+    public function write(string $data): void
+    {
+        $this->driver->send($data);
+    }
+    public function writeReceipt(Receipt $data): void
     {
         $this->driver->send((string)$data);
     }
