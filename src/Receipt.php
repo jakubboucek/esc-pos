@@ -132,6 +132,13 @@ class Receipt
         return $this;
     }
 
+    public function line(): self
+    {
+        // \xc4 = Em dash
+        // 48 = chars to receipt width
+        return $this->writeLf(str_repeat("\xc4", 48), true);
+    }
+
     public function left(): self
     {
         $this->buff(self::C_ESC . "\x61\x00");
