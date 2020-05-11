@@ -55,7 +55,7 @@ class Network implements IConnection
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
             socket_close($this->socket);
-            throw new SendException("Could not send data to server: [$errorcode] $errormsg\n");
+            throw new ConnectionException("Could not send data to server: [$errorcode] $errormsg\n");
         }
     }
 

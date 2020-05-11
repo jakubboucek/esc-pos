@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace JakubBoucek\EscPos\Connections;
 
-use Exception;
+use RuntimeException;
 
-class ConnectionException extends Exception
+class ConnectionException extends RuntimeException
 {
 }
