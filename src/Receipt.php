@@ -132,11 +132,16 @@ class Receipt
         return $this;
     }
 
-    public function line(): self
+    public function line(int $type = 0): self
     {
-        // \xc4 = Em dash
+        $chars = [
+            // \xc4 = Em dash
+            0 => "\xc4",
+            1 => "-",
+            2 => "- ",
+        ];
         // 48 = chars to receipt width
-        return $this->writeLf(str_repeat("\xc4", 48), true);
+        return $this->writeLf(str_repeat($chars[$type], $type == 2 ? (48 / 2) : 48), true);
     }
 
     public function left(): self
@@ -166,6 +171,30 @@ class Receipt
     public function unbold(): self
     {
         $this->buff(self::C_ESC . "\x45\x00");
+        return $this;
+    }
+
+    public function italic(): self
+    {
+        $this->buff(self::C_ESC . "\x34\x01");
+        return $this;
+    }
+
+    public function unitalic(): self
+    {
+        $this->buff(self::C_ESC . "\x34\x00");
+        return $this;
+    }
+
+    public function underline(): self
+    {
+        $this->buff(self::C_ESC . "\x2d\x01");
+        return $this;
+    }
+
+    public function ununderline(): self
+    {
+        $this->buff(self::C_ESC . "\x2d\x00");
         return $this;
     }
 
