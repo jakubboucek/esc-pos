@@ -31,8 +31,8 @@ class Receipt
     private function finalize(): void
     {
         $last = end($this->buffer);
-        //                     LF      cut
-        if (!in_array($last, ["\n", self::C_GS . "\x56\x42\x03"], true)) {
+        //                    LF      cut
+        if (in_array($last, ["\n", self::C_GS . "\x56\x42\x03"], true) === false) {
             $this->lf();
         }
     }
@@ -58,7 +58,7 @@ class Receipt
     {
         // GS V <n>
         $this->buff(
-            self::C_GS . "V"
+            self::C_GS . 'V'
             . chr($fullCut ? 0 : 1)
         );
         return $this;
@@ -99,7 +99,7 @@ class Receipt
         //GS (L 6 0 48 69 <kc1> <kc2> <x> <y>
         $this->buff(
             self::C_GS
-            . "(L"
+            . '(L'
             . "\x06\x00\x30\x45"
             . chr($kc1) . chr($kc2)
             . chr($sizeX) . chr($sizeY)
@@ -110,11 +110,11 @@ class Receipt
     public function ean13(string $data, int $width = 3, int $height = 42, int $text = 0, int $font = 0): self
     {
         $this->buff(
-            self::C_GS . "w" . chr($width)
-            . self::C_GS . "h" . chr($height)
-            . self::C_GS . "H" . chr($text)
-            . self::C_GS . "f" . chr($font)
-            . self::C_GS . "k" . "\x02" . $data . "\x00"
+            self::C_GS . 'w' . chr($width)
+            . self::C_GS . 'h' . chr($height)
+            . self::C_GS . 'H' . chr($text)
+            . self::C_GS . 'f' . chr($font)
+            . self::C_GS . 'k' . "\x02" . $data . "\x00"
         );
         return $this;
     }
@@ -123,10 +123,10 @@ class Receipt
     {
         $barData = "{B{1$data";
         $this->buff(
-            self::C_GS . "w" . chr($width)
-            . self::C_GS . "h" . chr($height)
-            . self::C_GS . "H" . chr($text)
-            . self::C_GS . "f" . chr($font)
+            self::C_GS . 'w' . chr($width)
+            . self::C_GS . 'h' . chr($height)
+            . self::C_GS . 'H' . chr($text)
+            . self::C_GS . 'f' . chr($font)
             . self::C_GS . "\x6bI" . chr(strlen($barData)) . $barData
         );
         return $this;
@@ -137,11 +137,11 @@ class Receipt
         $chars = [
             // \xc4 = Em dash
             0 => "\xc4",
-            1 => "-",
-            2 => "- ",
+            1 => '-',
+            2 => '- ',
         ];
         // 48 = chars to receipt width
-        return $this->writeLf(str_repeat($chars[$type], $type == 2 ? (48 / 2) : 48), true);
+        return $this->writeLf(str_repeat($chars[$type], $type === 2 ? (48 / 2) : 48), true);
     }
 
     public function left(): self
@@ -228,7 +228,7 @@ class Receipt
 
     private function encodeOutput(string $data): string
     {
-        return iconv("UTF-8", "cp852//IGNORE", $data);
+        return iconv('UTF-8', 'cp852//IGNORE', $data);
     }
 
     private function validateLogoKeyCode(int $keyCode): void
@@ -240,7 +240,7 @@ class Receipt
 
     public function test(): string
     {
-        $output = "";
+        $output = '';
         foreach ($this->buffer as $value) {
             for ($i = 0, $len = strlen($value); $i < $len; $i++) {
                 $output .= "\\x" . sprintf('%02s', dechex(ord($value[$i])));
@@ -253,7 +253,7 @@ class Receipt
     public function compile(): string
     {
         $this->finalize();
-        return implode("", $this->buffer);
+        return implode('', $this->buffer);
     }
 
     public function __toString(): string

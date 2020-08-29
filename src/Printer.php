@@ -20,6 +20,7 @@ class Printer
     {
         $this->driver->send($data);
     }
+
     public function writeReceipt(Receipt $data): void
     {
         $this->driver->send($data->compile());

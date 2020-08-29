@@ -19,13 +19,34 @@ class Network implements IConnection
         $this->port = $port;
     }
 
-    public function open(): void
+    public function __destruct()
     {
-        $socket = socket_create(AF_INET, SOCK_STREAM, 0);
-        if (!$socket) {
+        $this->close();
+    }
+
+    public function send(string $message): void
+    {
+        $this->open();
+
+        $socket_wrt = socket_write($this->socket, $message, strlen($message));
+        if ($socket_wrt === false) {
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
-            socket_close($socket);
+            $this->close();
+            throw new ConnectionException("Could not send data to server: [$errorcode] $errormsg\n");
+        }
+    }
+
+    public function open(): void
+    {
+        if ($this->isOpened()) {
+            return;
+        }
+
+        $socket = socket_create(AF_INET, SOCK_STREAM, 0);
+        if (is_resource($socket) === false) {
+            $errorcode = socket_last_error();
+            $errormsg = socket_strerror($errorcode);
             throw new ConnectionException("Could not create socket: [$errorcode] $errormsg");
         }
 
@@ -35,28 +56,13 @@ class Network implements IConnection
 
         // connect to server
         $result = socket_connect($socket, $this->host, $this->port);
-        if (!$result) {
+        if ($result === false) {
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
             socket_close($socket);
             throw new ConnectionException("Could not connect to server: [$errorcode] $errormsg");
         }
         $this->socket = $socket;
-    }
-
-    public function send(string $message): void
-    {
-        if (!$this->isOpened()) {
-            $this->open();
-        }
-
-        $socket_wrt = socket_write($this->socket, $message, strlen($message));
-        if (!$socket_wrt) {
-            $errorcode = socket_last_error();
-            $errormsg = socket_strerror($errorcode);
-            socket_close($this->socket);
-            throw new ConnectionException("Could not send data to server: [$errorcode] $errormsg\n");
-        }
     }
 
     public function close(): void
