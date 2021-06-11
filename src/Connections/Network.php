@@ -10,7 +10,7 @@ class Network implements IConnection
     private $host;
     /** @var int */
     private $port;
-    /** @var resource|null */
+    /** @var \Socket|resource|null */
     private $socket;
 
     public function __construct(string $host, int $port = 9100)
@@ -43,8 +43,10 @@ class Network implements IConnection
             return;
         }
 
+        /** @var \Socket|resource $socket */
         $socket = socket_create(AF_INET, SOCK_STREAM, 0);
-        if (is_resource($socket) === false) {
+        if ((PHP_VERSION_ID < 80000 && is_resource($socket) === false)
+            || (PHP_VERSION_ID >= 80000 && ($socket instanceof \Socket) === false)) {
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
             throw new ConnectionException("Could not create socket: [$errorcode] $errormsg");
