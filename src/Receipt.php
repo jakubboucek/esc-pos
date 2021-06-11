@@ -31,7 +31,7 @@ class Receipt
     private function finalize(): void
     {
         $last = end($this->buffer);
-        //                    LF      cut
+        //                    LF   cut
         if (in_array($last, ["\n", self::C_GS . "\x56\x42\x03"], true) === false) {
             $this->lf();
         }
@@ -77,16 +77,17 @@ class Receipt
 
     public function write(string $data, bool $alreadyEncoded = false): self
     {
-        if ($alreadyEncoded !== true) {
+        if ($alreadyEncoded === false) {
             $data = $this->encodeOutput($data);
         }
+
         $this->buff($data);
         return $this;
     }
 
-    public function writeLf(string $data, bool $encoded = false): self
+    public function writeLf(string $data, bool $alreadyEncoded = false): self
     {
-        $this->write($data, $encoded);
+        $this->write($data, $alreadyEncoded);
         $this->lf();
         return $this;
     }
@@ -217,9 +218,9 @@ class Receipt
         return $this;
     }
 
-    public function strlen(string $data, bool $encoded = false): int
+    public function strlen(string $data, bool $alreadyEncoded = false): int
     {
-        if ($encoded) {
+        if ($alreadyEncoded) {
             return strlen($data);
         }
 
