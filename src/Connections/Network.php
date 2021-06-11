@@ -24,11 +24,11 @@ class Network implements IConnection
         $this->close();
     }
 
-    public function send(string $message): void
+    public function send(string $data): void
     {
         $this->open();
 
-        $socket_wrt = socket_write($this->socket, $message, strlen($message));
+        $socket_wrt = socket_write($this->socket, $data, strlen($data));
         if ($socket_wrt === false) {
             $errorcode = socket_last_error();
             $errormsg = socket_strerror($errorcode);
