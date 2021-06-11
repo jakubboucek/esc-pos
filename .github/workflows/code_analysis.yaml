@@ -1,0 +1,62 @@
+name: Code Analysis
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  code_analysis:
+    strategy:
+      fail-fast: false
+      matrix:
+        actions:
+          - name: PHPStan
+            run: composer phpstan
+
+        php:
+          - name: PHP 7.3
+            version: 7.3
+
+          - name: PHP 7.4
+            version: 7.4
+
+          - name: PHP 8.0
+            version: 8.0
+
+    name: ${{ matrix.actions.name }} on ${{ matrix.php.name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+
+      # see https://github.com/shivammathur/setup-php
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php.version }}
+          coverage: none
+
+
+      # see https://github.com/actions/cache/blob/main/examples.md#php---composer
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ${{ steps.composer-cache.outputs.dir }}
+            **/composer.lock
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+
+      - name: Install Composer
+        run: composer install --no-progress
+
+      - run: ${{ matrix.actions.run }}
