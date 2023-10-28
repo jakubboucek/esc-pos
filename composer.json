@@ -1,8 +1,8 @@
 {
     "name": "jakubboucek/esc-pos",
     "description": "Native ESC-POS drivers",
-    "type": "library",
     "license": "MIT",
+    "type": "library",
     "authors": [
         {
             "name": "Jakub Bouček",
@@ -11,17 +11,19 @@
     ],
     "require": {
         "php": ">=7.2",
-        "composer-runtime-api": "^2.0",
-        "ext-sockets": "*",
-        "ext-iconv": "*"
+        "ext-iconv": "*",
+        "ext-sockets": "*"
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.12.89"
+        "phpstan/phpstan": "^1.10"
     },
     "autoload": {
         "psr-4": {
             "JakubBoucek\\EscPos\\": "src/"
         }
+    },
+    "config": {
+        "sort-packages": true
     },
     "scripts": {
         "phpstan": "phpstan analyze src -c phpstan.neon --level 6"
