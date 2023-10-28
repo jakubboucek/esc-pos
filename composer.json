@@ -16,7 +16,7 @@
         "ext-iconv": "*"
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.12.89"
+        "phpstan/phpstan": "^1.10"
     },
     "autoload": {
         "psr-4": {
